@@ -38,7 +38,9 @@ public class CameraPreviewActivity extends Activity {
     private BluetoothClient bluetoothClient;
     private boolean connected = false;
     Timer mTimer;
-
+    private static final int DataCode_Picture = 0xffff0001;
+    private static final int DataCode_ServerStatus = 0xffff0002;
+    private boolean acceptServer = false;
     CameraPreviewActivity self;
 
     BluetoothClient.BluetoothClientCallback clientCallback = new BluetoothClient.BluetoothClientCallback() {
@@ -73,13 +75,27 @@ public class CameraPreviewActivity extends Activity {
         }
 
         @Override
-        public void onReceive(String readMsg) {
-            /*
-            Message msg = new Message();
-            msg.what = 0;
-            msg.obj = readMsg;
-            handler.sendMessage(msg);
-            */
+        public void onReceive(byte[] buffer, int bytes) {
+            ByteBuffer buf = ByteBuffer.wrap(buffer);
+            if (bytes < 4) {
+                return;
+            }
+            int code = buf.getInt(0);
+            switch (code) {
+                case DataCode_ServerStatus:
+                    if (bytes < 8) {
+                        return;
+                    }
+                    int status = buf.getInt(4);
+                    if (status == 0) {
+                        acceptServer = false;
+                    } else {
+                        acceptServer = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     };
 
@@ -96,8 +112,8 @@ public class CameraPreviewActivity extends Activity {
         mPreview = new Preview(this);
         setContentView(mPreview);
 
-        mPreview.setOnClickListener(onSurfaceClickListener);
         /*
+        mPreview.setOnClickListener(onSurfaceClickListener);
         mTimer = new Timer(true);
         mTimer.schedule( new TimerTask(){
             @Override
@@ -106,7 +122,7 @@ public class CameraPreviewActivity extends Activity {
                     mCamera.setOneShotPreviewCallback(previewCallback);
                 }
             }
-        }, 500, 5000);
+        }, 100, 2500);
         */
     }
 
@@ -116,6 +132,7 @@ public class CameraPreviewActivity extends Activity {
         // Open the default i.e. the first rear facing camera.
         mCamera = Camera.open();
         mPreview.setCamera(mCamera);
+        mCamera.setPreviewCallback(previewCallback);
     }
     @Override
     protected void onPause() {
@@ -123,6 +140,7 @@ public class CameraPreviewActivity extends Activity {
         // Because the Camera object is a shared resource, it's very
         // important to release it when the activity is paused.
         if (mCamera != null) {
+            mCamera.setPreviewCallback(null);
             mPreview.setCamera(null);
             mCamera.release();
             mCamera = null;
@@ -135,7 +153,7 @@ public class CameraPreviewActivity extends Activity {
             if(mCamera != null){
                 //AutoFocusを実行
                 //myCamera.autoFocus(autoFocusCallback);
-                mCamera.setOneShotPreviewCallback(previewCallback);
+                //mCamera.setOneShotPreviewCallback(previewCallback);
             }
         }
 
@@ -147,17 +165,18 @@ public class CameraPreviewActivity extends Activity {
         //OnShotPreview時のbyte[]が渡ってくる
         @Override
         public void onPreviewFrame(byte[] bytes, Camera camera) {
-            Camera.Parameters p = camera.getParameters();
+            camera.setPreviewCallback(null);
             int w = camera.getParameters().getPreviewSize().width;
             int h = camera.getParameters().getPreviewSize().height;
             //byte[] jpeg = getBitmapImageFromYUV(bytes, w, h);
             ByteBuffer buf = ByteBuffer.allocate(8 + 4 * 3);
-            buf.putInt(0xffff0001);
+            buf.putInt(DataCode_Picture);
             buf.putLong(bytes.length);
             buf.putInt(w);   // プレビューの幅
             buf.putInt(h);  // プレビューの高さ
             bluetoothClient.writeByte(buf.array());
             bluetoothClient.writeByte(bytes);
+            camera.setPreviewCallback(this);
         }
     };
 }
@@ -189,18 +208,7 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
             requestLayout();
         }
     }
-    public void switchCamera(Camera camera) {
-        setCamera(camera);
-        try {
-            camera.setPreviewDisplay(mHolder);
-        } catch (IOException exception) {
-            Log.e(TAG, "IOException caused by setPreviewDisplay()", exception);
-        }
-        Camera.Parameters parameters = camera.getParameters();
-        //parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
-        requestLayout();
-        camera.setParameters(parameters);
-    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // We purposely disregard child measurements because act as a

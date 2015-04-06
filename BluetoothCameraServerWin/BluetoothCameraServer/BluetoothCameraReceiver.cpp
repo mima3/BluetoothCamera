@@ -68,7 +68,6 @@ CBluetoothCameraReceiver::~CBluetoothCameraReceiver()
 void CBluetoothCameraReceiver::OnErrorCallback(const BluetoothServerError& error) {
 	static WCHAR msg[1024];
 	wsprintf(msg, L"(0x%x) %s\n", error.errorcode, error.message);
-	::OutputDebugString(msg);
 	::PostMessage(this->m_targethWnd, WM_BLUETOOTH_ERROR, (WPARAM)&msg, NULL);
 }
 
@@ -76,9 +75,6 @@ bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKADDR_BTH saddr) {
 	CAutoLock lock(&this->m_mutexlock);
 
 	UINT64 addr = GET_SAP(saddr.btAddr);
-	WCHAR msg[1024];
-	wsprintf(msg, L"connected %I64x\n", addr);
-	::OutputDebugString(msg);
 	::SendMessage(this->m_targethWnd, WM_BLUETOOTH_CONNECTED, (WPARAM)&addr, NULL);
 
 	CRecevicedData* pData = new CRecevicedData(addr);
@@ -90,9 +86,6 @@ bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKADDR_BTH saddr) {
 
 void CBluetoothCameraReceiver::OnReceivedCallback(SOCKADDR_BTH saddr, char* data, int recvSize) {
 	UINT64 addr = GET_SAP(saddr.btAddr);
-	WCHAR msg[1024];
-	wsprintf(msg, L"received %d\n", recvSize);
-	::OutputDebugString(msg);
 	CAutoLock lock(&this->m_mutexlock);
 	CRecevicedData *pRcvData = this->m_mapReceived[addr];
 
@@ -173,9 +166,6 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKADDR_BTH saddr, char* data
  */
 void CBluetoothCameraReceiver::OnConnectionClosed(SOCKADDR_BTH saddr) {
 	UINT64 addr = GET_SAP(saddr.btAddr);
-	WCHAR msg[1024];
-	wsprintf(msg, L"closed %I64x\n", addr);
-	::OutputDebugString(msg);
 
 	CAutoLock lock(&this->m_mutexlock);
 	delete this->m_mapReceived[addr];

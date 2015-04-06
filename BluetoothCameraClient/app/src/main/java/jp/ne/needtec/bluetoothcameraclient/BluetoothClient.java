@@ -14,12 +14,11 @@ import java.util.UUID;
 /**
  * Created by m.ita on 2015/03/27.
  */
-
 public class BluetoothClient {
     public interface BluetoothClientCallback {
         public void onConnected(BluetoothClient client);
         public void onClose();
-        public void onReceive(String readMsg);
+        public void onReceive(byte[] buffer, int bytes);
     }
 
     private ReadWriteThread readWriteThread = null;
@@ -27,10 +26,18 @@ public class BluetoothClient {
     private BluetoothDevice connectDevice;
     private BluetoothClientCallback callback;
 
+    /**
+     * コンストラクタ
+     * @param device 接続対象のペアリング中のBluetoothDevice
+     */
     BluetoothClient(BluetoothDevice device) {
         this.connectDevice = device;
     }
 
+    /**
+     * 接続を行う
+     * @param cb コールバッククラス
+     */
     public void connect(BluetoothClientCallback cb)
     {
         this.connThread = new ConnectThread(this.connectDevice);
@@ -38,6 +45,9 @@ public class BluetoothClient {
         this.callback = cb;
     }
 
+    /**
+     * 接続の切断
+     */
     public void close()
     {
         if (this.connThread != null) {
@@ -48,6 +58,11 @@ public class BluetoothClient {
         }
     }
 
+    /**
+     * バイトを送信する
+     * @param bytes 送信するバイト
+     * @return true送信が成功
+     */
     public boolean writeByte(byte[] bytes) {
         if (this.readWriteThread == null) {
             return false;
@@ -56,7 +71,11 @@ public class BluetoothClient {
         return true;
     }
 
-
+    /**
+     * 文字列を送信する
+     * @param msg 送信する文字列
+     * @return true送信が成功
+     */
     public boolean writeMessage(String msg) {
         if (this.readWriteThread == null) {
             return false;
@@ -72,6 +91,7 @@ public class BluetoothClient {
 
     /**
      * Server, Client共通 接続が確立した際に呼び出される
+     * @param socket 接続対象のSOCKET
      */
     private void manageConnectedSocket(BluetoothSocket socket) {
         Log.i("BluetoothClient", "Connection");
@@ -80,6 +100,9 @@ public class BluetoothClient {
         this.callback.onConnected(this);
     }
 
+    /**
+     * 接続用のスレッドクラス
+     */
     private class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final UUID serviceUUID = UUID.fromString("2C242765-AEE4-41EB-A7E3-B28D39B75D33");
@@ -123,13 +146,13 @@ public class BluetoothClient {
      * 接続確立時のデータ送受信用のThread
      */
     private class ReadWriteThread extends Thread {
-        private final BluetoothSocket mmSocket;
-        private final InputStream mmInStream;
-        private final OutputStream mmOutStream;
+        private final BluetoothSocket mSocket;
+        private final InputStream mInStream;
+        private final OutputStream mOutStream;
 
         public ReadWriteThread(BluetoothSocket socket) {
             Log.i("BluetoothClient", "ConnectedThread");
-            mmSocket = socket;
+            mSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
@@ -141,9 +164,9 @@ public class BluetoothClient {
             }
 
             // データ受信用
-            mmInStream = tmpIn;
+            mInStream = tmpIn;
             // データ送信用
-            mmOutStream = tmpOut;
+            mOutStream = tmpOut;
         }
 
         public void run() {
@@ -155,12 +178,12 @@ public class BluetoothClient {
             while (true) {
                 try {
                     // InputStreamから値を取得
-                    bytes = mmInStream.read(buffer);
+                    bytes = mInStream.read(buffer);
                     // 取得したデータをStringの変換
-                    String readMsg = new String(buffer, 0, bytes, "UTF-8");
+                    //String readMsg = new String(buffer, 0, bytes, "UTF-8");
                     // Logに表示
-                    Log.d("BluetoothClient", "GET: " + readMsg);
-                    callback.onReceive(readMsg);
+                    //Log.d("BluetoothClient", "GET: " + readMsg);
+                    callback.onReceive(buffer, bytes);
 
                 } catch (IOException e) {
                     Log.e("BluetoothClient", e.getMessage());
@@ -178,11 +201,12 @@ public class BluetoothClient {
             try {
                 int offset = 0;
                 for (; offset < bytes.length - buffSize; offset = offset + buffSize) {
-                    mmOutStream.write(bytes, offset, buffSize);
+                    mOutStream.write(bytes, offset, buffSize);
                 }
                 if (offset < bytes.length) {
-                    mmOutStream.write(bytes, offset, bytes.length - offset);
+                    mOutStream.write(bytes, offset, bytes.length - offset);
                 }
+                mOutStream.flush();
             } catch (IOException e) {
                 Log.e("BluetoothClient", e.getMessage());
             }
@@ -193,7 +217,7 @@ public class BluetoothClient {
          */
         public void close() {
             try {
-                mmSocket.close();
+                mSocket.close();
             } catch (IOException e) {
                 Log.e("BluetoothClient", e.getMessage());
             }

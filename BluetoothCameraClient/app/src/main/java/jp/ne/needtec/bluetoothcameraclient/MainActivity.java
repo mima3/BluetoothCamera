@@ -25,6 +25,8 @@ public class MainActivity extends Activity {
     ArrayAdapter<String> listDeviceAdapter;
     List<String> deviceNameList = new ArrayList<>();
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +47,10 @@ public class MainActivity extends Activity {
         });
 
     }
+
+    /**
+     * ペアリング中のデバイスの検索をおこない、リストビューに追加を行う
+     */
     protected void searchDevice() {
         this.listDeviceAdapter = new ArrayAdapter<>(
                 this,

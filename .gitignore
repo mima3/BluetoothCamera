@@ -50,3 +50,5 @@ Temporary Items
 /BluetoothCameraServerWin/ipch
 /BluetoothCameraServerWin/BluetoothCameraServer.sdf
 /BluetoothCameraClient/.idea
+/BluetoothCameraClient/.gitignore
+/BluetoothCameraServerWin/BluetoothCameraServer/BluetoothCameraServer.vcxproj.user
