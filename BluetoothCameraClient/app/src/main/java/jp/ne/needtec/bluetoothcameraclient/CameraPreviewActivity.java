@@ -4,11 +4,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -67,7 +70,7 @@ public class CameraPreviewActivity extends Activity {
             }
             int code = buf.getInt(0);
             switch (code) {
-                case BluetoothCameraNetInterface.DATA_CODE_SERVER_STATUS:
+                case BluetoothCameraNetInterface.DATA_CODE_SERVER_STATUS: {
                     if (bytes < 8) {
                         return;
                     }
@@ -78,6 +81,25 @@ public class CameraPreviewActivity extends Activity {
                         acceptServer = true;
                     }
                     break;
+                }
+                case BluetoothCameraNetInterface.DATA_CODE_SET_LIGHT_STATUS: {
+                    if (bytes < 8) {
+                        return;
+                    }
+                    int status = buf.getInt(4);
+                    PackageManager pm = getPackageManager();
+                    if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+                        Camera.Parameters params = mCamera.getParameters();
+                        //params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                        if (status == 1) {
+                            params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                        } else {
+                            params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                        }
+                        mCamera.setParameters(params);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -97,8 +119,9 @@ public class CameraPreviewActivity extends Activity {
         mPreview = new Preview(this);
         setContentView(mPreview);
 
-        /*
         mPreview.setOnClickListener(onSurfaceClickListener);
+
+        /*
         mTimer = new Timer(true);
         mTimer.schedule( new TimerTask(){
             @Override
@@ -166,6 +189,30 @@ public class CameraPreviewActivity extends Activity {
             camera.setPreviewCallback(this);
         }
     };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
 }
 
 /**

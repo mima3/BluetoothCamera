@@ -71,6 +71,7 @@ BEGIN_MESSAGE_MAP(CBluetoothCameraServerDlg, CDialogEx)
 	ON_MESSAGE(WM_BLUETOOTH_CONNECTED, &CBluetoothCameraServerDlg::OnBluetoothConnected)
 	ON_MESSAGE(WM_BLUETOOTH_ERROR, &CBluetoothCameraServerDlg::OnBluetoothError)
 	ON_MESSAGE(WM_CLOSE_CAMERA_WINDOW, &CBluetoothCameraServerDlg::OnCloseCameraWindow)
+	ON_MESSAGE(WM_CAMERA_LIGHT_STATUS, &CBluetoothCameraServerDlg::OnCameraLightStatus)
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
@@ -221,6 +222,18 @@ afx_msg LRESULT CBluetoothCameraServerDlg::OnCloseCameraWindow(WPARAM wParam, LP
 	this->WriteLog(L"Close Windows: %I64x", *deviceAddr);
 	return 0;
 }
+
+/**
+* ƒJƒƒ‰‚ÌÆ–¾•ÏX
+*/
+afx_msg LRESULT CBluetoothCameraServerDlg::OnCameraLightStatus(WPARAM wParam, LPARAM lParam) {
+	UINT64 *deviceAddr = (UINT64*)wParam;
+	this->m_bluetoothServer.LightStatus(*deviceAddr, (UINT32)lParam);
+	this->WriteLog(L"OnCameraLightStatus: %I64x %d", *deviceAddr, lParam);
+
+	return 0;
+}
+
 
 void CBluetoothCameraServerDlg::OnDestroy()
 {

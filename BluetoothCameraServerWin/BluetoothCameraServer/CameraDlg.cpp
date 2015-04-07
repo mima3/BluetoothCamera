@@ -6,6 +6,7 @@
 #include "BluetoothAppDefine.h"
 #include "BluetoothCameraReceiver.h"
 #include "BluetoothAppDefine.h"
+#include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -31,6 +32,7 @@ void CCameraDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CAMERA, m_pictCamera);
+	DDX_Control(pDX, IDC_DEVICE_ID, m_lblDeviceId);
 }
 
 
@@ -39,6 +41,8 @@ BEGIN_MESSAGE_MAP(CCameraDlg, CDialogEx)
 	ON_WM_SIZE()
 	ON_WM_CLOSE()
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_LIGHT_ON, &CCameraDlg::OnBnClickedLightOn)
+	ON_BN_CLICKED(IDC_LIGHT_OFF, &CCameraDlg::OnBnClickedLightOff)
 END_MESSAGE_MAP()
 
 
@@ -121,4 +125,28 @@ void CCameraDlg::OnDestroy()
 {
 	this->GetParent()->SendMessage(WM_CLOSE_CAMERA_WINDOW, (WPARAM)&this->m_deviceAddr, NULL);
 	CDialogEx::OnDestroy();
+}
+
+
+BOOL CCameraDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+	WCHAR deviceId[256];
+	wsprintf(deviceId, L"%I64x", this->m_deviceAddr);
+	CString id = deviceId;
+	this->m_lblDeviceId.SetWindowTextW(id.MakeUpper());
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+}
+
+
+void CCameraDlg::OnBnClickedLightOn()
+{
+	this->GetParent()->SendMessage(WM_CAMERA_LIGHT_STATUS, (WPARAM)&this->m_deviceAddr, 1);
+}
+
+
+void CCameraDlg::OnBnClickedLightOff()
+{
+	this->GetParent()->SendMessage(WM_CAMERA_LIGHT_STATUS, (WPARAM)&this->m_deviceAddr, 0);
 }

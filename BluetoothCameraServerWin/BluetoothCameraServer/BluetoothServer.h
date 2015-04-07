@@ -47,6 +47,7 @@ public:
 	bool StartService(const GUID& guid, CBluetootheServerCallback* callback);
 	void StopService();
 	void CloseSocket(UINT64 addr);
+	void LightStatus(UINT64 addr, UINT32 sts);
 private:
 	pthread_t m_connThread;
 	ConnectionThreadParam m_connParam;

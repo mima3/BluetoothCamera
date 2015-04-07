@@ -4,6 +4,9 @@
 #include <bthsdpdef.h>
 #include <BluetoothAPIs.h>
 #include "AutoLock.h"
+#include "BufferUtil.h"
+#include "BluetoothCameraNetInterface.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -323,4 +326,18 @@ void CBluetoothServer::StopService() {
 void CBluetoothServer::CloseSocket(UINT64 addr) {
 	const ReadwriteThreadData* pData = CBluetoothServer::findReadWriteThreadByAddress(addr);
 	closesocket(pData->param->socket);
+}
+/**
+* 証明の設定
+* @param[in] addr デバイスのアドレス
+* @param[in] sts  0:消灯 1:点灯
+*/
+void CBluetoothServer::LightStatus(UINT64 addr, UINT32 sts) {
+	const ReadwriteThreadData* pData = CBluetoothServer::findReadWriteThreadByAddress(addr);
+	char buffer[8];
+	size_t offset = 0;
+	CBufferUtil::SetUINT32Data(&buffer[0], offset, DATA_CODE_SET_LIGHT_STATUS);
+	CBufferUtil::SetUINT32Data(&buffer[0], offset, sts);
+
+	send(pData->param->socket, buffer, 8, 0);
 }

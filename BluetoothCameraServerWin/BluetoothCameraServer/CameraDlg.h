@@ -2,8 +2,10 @@
 #include "afxwin.h"
 
 
-// CameraDlg ダイアログ
-
+/**
+ * @class CCameraDlg
+ * @brief カメラプレビュー用のダイアログ
+ */
 class CCameraDlg : public CDialogEx
 {
 	DECLARE_DYNAMIC(CCameraDlg)
@@ -18,6 +20,7 @@ public:
 protected:
 	CStatic m_pictCamera;
 	UINT64 m_deviceAddr;
+	CStatic m_lblDeviceId;
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
 
@@ -28,6 +31,9 @@ protected:
 	virtual void PostNcDestroy();
 	virtual void OnCancel();
 	afx_msg void OnClose();
-public:
 	afx_msg void OnDestroy();
+public:
+	virtual BOOL OnInitDialog();
+	afx_msg void OnBnClickedLightOn();
+	afx_msg void OnBnClickedLightOff();
 };
