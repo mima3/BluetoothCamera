@@ -4,7 +4,7 @@
 #include "BluetoothAppDefine.h"
 #include "afxdialogex.h"
 #include "CameraDlg.h"
-
+#include "BluetoothCameraSender.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -228,9 +228,8 @@ afx_msg LRESULT CBluetoothCameraServerDlg::OnCloseCameraWindow(WPARAM wParam, LP
 */
 afx_msg LRESULT CBluetoothCameraServerDlg::OnCameraLightStatus(WPARAM wParam, LPARAM lParam) {
 	UINT64 *deviceAddr = (UINT64*)wParam;
-	this->m_bluetoothServer.LightStatus(*deviceAddr, (UINT32)lParam);
-	this->WriteLog(L"OnCameraLightStatus: %I64x %d", *deviceAddr, lParam);
-
+	SOCKET socket = this->m_bluetoothServer.GetSocketByAddress(*deviceAddr);
+	CBluetoothCameraSender::SetLightStatus(socket, (UINT32)lParam);
 	return 0;
 }
 

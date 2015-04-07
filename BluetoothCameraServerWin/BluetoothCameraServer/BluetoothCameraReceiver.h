@@ -53,7 +53,6 @@ private:
 	pthread_mutex_t m_mutexlock;
 	pthread_mutexattr_t m_mutexattr;
 	HWND m_targethWnd;
-	static void sendServerStatus(SOCKET socket, UINT32 status);
 	static void decodeYUV420SP(int rgb[], char yuv420sp[], int width, int height);
 	static int getRgbValueInRange(int value);
 	static int getRgb(int y, int u, int v);

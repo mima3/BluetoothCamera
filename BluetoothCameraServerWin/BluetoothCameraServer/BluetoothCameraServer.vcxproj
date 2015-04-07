@@ -208,6 +208,7 @@
     <ClInclude Include="BluetoothAppDefine.h" />
     <ClInclude Include="BluetoothCameraNetInterface.h" />
     <ClInclude Include="BluetoothCameraReceiver.h" />
+    <ClInclude Include="BluetoothCameraSender.h" />
     <ClInclude Include="BluetoothCameraServer.h" />
     <ClInclude Include="BluetoothCameraServerDlg.h" />
     <ClInclude Include="BluetoothServer.h" />
@@ -220,6 +221,7 @@
   <ItemGroup>
     <ClCompile Include="AutoLock.cpp" />
     <ClCompile Include="BluetoothCameraReceiver.cpp" />
+    <ClCompile Include="BluetoothCameraSender.cpp" />
     <ClCompile Include="BluetoothCameraServer.cpp" />
     <ClCompile Include="BluetoothCameraServerDlg.cpp" />
     <ClCompile Include="BluetoothServer.cpp" />

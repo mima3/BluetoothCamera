@@ -6,6 +6,7 @@
 #include "AutoLock.h"
 #include "BufferUtil.h"
 #include "BluetoothCameraNetInterface.h"
+#include "BluetoothCameraSender.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -86,18 +87,12 @@ bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKET socket, SOCKADDR_BTH s
 	CRecevicedData* pData = new CRecevicedData(addr);
 	this->m_mapReceived[addr] = pData;
 
-	sendServerStatus(socket, 1);
+	CBluetoothCameraSender::SetServerStatus(socket, 1);
 
 	return true;
 }
 
-void CBluetoothCameraReceiver::sendServerStatus(SOCKET socket, UINT32 status) {
-	char buf[8];
-	size_t offset = 0;
-	CBufferUtil::SetUINT32Data(&buf[0], offset, DATA_CODE_SERVER_STATUS);
-	CBufferUtil::SetUINT32Data(&buf[0], offset, status);
-	send(socket, buf, 8, 0);
-}
+
 
 
 void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH saddr, char* data, int recvSize) {
@@ -116,7 +111,7 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 			return;
 		}
 		// サーバの受信を無効にする
-		sendServerStatus(socket, 0);
+		CBluetoothCameraSender::SetServerStatus(socket, 0);
 
 		pRcvData->m_BufferSize = (size_t)CBufferUtil::GetUINT64Data(data, offset);
 		pRcvData->m_width = CBufferUtil::GetUINT32Data(data, offset);
@@ -176,7 +171,7 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 			pRcvData->m_height = 0;
 
 			// サーバの受信を有効にする
-			sendServerStatus(socket, 1);
+			CBluetoothCameraSender::SetServerStatus(socket, 1);
 		}
 	}
 }
