@@ -92,8 +92,5 @@
     <Image Include="res\BluetoothCameraServer.ico">
       <Filter>リソース ファイル</Filter>
     </Image>
-    <Image Include="res\bitmap1.bmp">
-      <Filter>リソース ファイル</Filter>
-    </Image>
   </ItemGroup>
 </Project>
