@@ -210,6 +210,7 @@
     <ClInclude Include="BluetoothCameraServer.h" />
     <ClInclude Include="BluetoothCameraServerDlg.h" />
     <ClInclude Include="BluetoothServer.h" />
+    <ClInclude Include="BufferUtil.h" />
     <ClInclude Include="CameraDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -221,6 +222,7 @@
     <ClCompile Include="BluetoothCameraServer.cpp" />
     <ClCompile Include="BluetoothCameraServerDlg.cpp" />
     <ClCompile Include="BluetoothServer.cpp" />
+    <ClCompile Include="BufferUtil.cpp" />
     <ClCompile Include="CameraDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -13,8 +13,8 @@ struct BluetoothServerError {
 class CBluetootheServerCallback {
 public:
 	virtual void OnErrorCallback(const BluetoothServerError& error) { };
-	virtual bool OnConnectedCallback(SOCKADDR_BTH saddr) { return true; };
-	virtual void OnReceivedCallback(SOCKADDR_BTH saddr, char* data, int recvSize) { };
+	virtual bool OnConnectedCallback(SOCKET socket, SOCKADDR_BTH saddr) { return true; };
+	virtual void OnReceivedCallback(SOCKET socket, SOCKADDR_BTH saddr, char* data, int recvSize) { };
 	virtual void OnConnectionClosed(SOCKADDR_BTH saddr) { };
 };
 

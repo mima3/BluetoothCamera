@@ -4,6 +4,7 @@
 #include <fstream>
 #include "BluetoothAppDefine.h"
 #include "AutoLock.h"
+#include "BufferUtil.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -71,7 +72,11 @@ void CBluetoothCameraReceiver::OnErrorCallback(const BluetoothServerError& error
 	::PostMessage(this->m_targethWnd, WM_BLUETOOTH_ERROR, (WPARAM)&msg, NULL);
 }
 
-bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKADDR_BTH saddr) {
+
+/**
+ * 接続開始のコールバック
+ */
+bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKET socket, SOCKADDR_BTH saddr) {
 	CAutoLock lock(&this->m_mutexlock);
 
 	UINT64 addr = GET_SAP(saddr.btAddr);
@@ -80,11 +85,21 @@ bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKADDR_BTH saddr) {
 	CRecevicedData* pData = new CRecevicedData(addr);
 	this->m_mapReceived[addr] = pData;
 
+	sendServerStatus(socket, 1);
+
 	return true;
 }
 
+void CBluetoothCameraReceiver::sendServerStatus(SOCKET socket, UINT32 status) {
+	char buf[8];
+	size_t offset = 0;
+	CBufferUtil::SetUINT32Data(&buf[0], offset, 0xffff0002);
+	CBufferUtil::SetUINT32Data(&buf[0], offset, status);
+	send(socket, buf, 8, 0);
+}
 
-void CBluetoothCameraReceiver::OnReceivedCallback(SOCKADDR_BTH saddr, char* data, int recvSize) {
+
+void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH saddr, char* data, int recvSize) {
 	UINT64 addr = GET_SAP(saddr.btAddr);
 	CAutoLock lock(&this->m_mutexlock);
 	CRecevicedData *pRcvData = this->m_mapReceived[addr];
@@ -94,15 +109,17 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKADDR_BTH saddr, char* data
 		// 初回の受信
 		UINT32 tmp32;
 		size_t offset = 0;
-		tmp32 = GetUINT32Data(data, offset);
+		tmp32 = CBufferUtil::GetUINT32Data(data, offset);
 		if (tmp32 != 0xffff0001) {
 			// 指定のコード以外の場合、予期せぬデータなので無視。
 			return;
 		}
+		// サーバの受信を無効にする
+		sendServerStatus(socket, 0);
 
-		pRcvData->m_BufferSize = (size_t)GetUINT64Data(data, offset);
-		pRcvData->m_width = GetUINT32Data(data, offset);
-		pRcvData->m_height = GetUINT32Data(data, offset);
+		pRcvData->m_BufferSize = (size_t)CBufferUtil::GetUINT64Data(data, offset);
+		pRcvData->m_width = CBufferUtil::GetUINT32Data(data, offset);
+		pRcvData->m_height = CBufferUtil::GetUINT32Data(data, offset);
 		if (pRcvData->m_buff) {
 			delete pRcvData;
 		}
@@ -156,6 +173,9 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKADDR_BTH saddr, char* data
 			pRcvData->m_currentPos = 0;
 			pRcvData->m_width = 0;
 			pRcvData->m_height = 0;
+
+			// サーバの受信を有効にする
+			sendServerStatus(socket, 1);
 		}
 	}
 }
@@ -173,19 +193,7 @@ void CBluetoothCameraReceiver::OnConnectionClosed(SOCKADDR_BTH saddr) {
 }
 
 
-UINT64 CBluetoothCameraReceiver::GetUINT64Data(char* data, size_t &offset) {
-	UINT64 tmp64;
-	memcpy(&tmp64, (data + offset), sizeof(UINT64));
-	offset += sizeof(UINT64);
-	return _byteswap_uint64(tmp64);
-}
 
-UINT32 CBluetoothCameraReceiver::GetUINT32Data(char* data, size_t &offset) {
-	UINT32 tmp32;
-	memcpy(&tmp32, (data + offset), sizeof(UINT32));
-	offset += sizeof(UINT32);
-	return _byteswap_ulong(tmp32);
-}
 
 
 /**

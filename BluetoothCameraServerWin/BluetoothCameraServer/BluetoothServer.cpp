@@ -57,7 +57,7 @@ void* CBluetoothServer::readThread(void* param) {
 			removeReadWriteThread(data->id);
 			return NULL;
 		}
-		data->pCallback->OnReceivedCallback(pParamRW->saddr, &buffer[0], recvSize);
+		data->pCallback->OnReceivedCallback(pParamRW->socket, pParamRW->saddr, &buffer[0], recvSize);
 		pthread_testcancel();
 	}
 	return NULL;
@@ -254,7 +254,7 @@ void* CBluetoothServer::connectitonThread(void *param)
 		paramRW->socket = s2;
 		pthread_t thread;
 
-		if (pCallback->OnConnectedCallback(sab2)) {
+		if (pCallback->OnConnectedCallback(s2, sab2)) {
 			int ret = pthread_create(&thread, NULL, CBluetoothServer::readThread, paramRW);
 			if (ret) {
 				bsError.errorcode = ret;

@@ -1,7 +1,6 @@
 package jp.ne.needtec.bluetoothcameraclient;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -40,7 +39,7 @@ public class MainActivity extends Activity {
                 BluetoothClientManager mgr = BluetoothClientManager.getInstance();
                 // インテントの生成
                 Intent intent = new Intent(MainActivity.this, CameraPreviewActivity.class);
-                int clientId = mgr.createClient(device);
+                int clientId = BluetoothClientManager.createClient(device);
                 intent.putExtra("CLIENT_ID", clientId);
                 startActivity(intent);
             }

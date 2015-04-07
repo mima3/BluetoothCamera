@@ -44,8 +44,8 @@ public:
 	~CBluetoothCameraReceiver();
 
 	void OnErrorCallback(const BluetoothServerError& error);
-	bool OnConnectedCallback(SOCKADDR_BTH saddr);
-	void OnReceivedCallback(SOCKADDR_BTH saddr, char* data, int recvSize);
+	bool OnConnectedCallback(SOCKET socket, SOCKADDR_BTH saddr);
+	void OnReceivedCallback(SOCKET socket, SOCKADDR_BTH saddr, char* data, int recvSize);
 	void OnConnectionClosed(SOCKADDR_BTH saddr);
 
 private:
@@ -53,10 +53,7 @@ private:
 	pthread_mutex_t m_mutexlock;
 	pthread_mutexattr_t m_mutexattr;
 	HWND m_targethWnd;
-
-	static UINT64 GetUINT64Data(char* data, size_t &offset);
-	static UINT32 GetUINT32Data(char* data, size_t &offset);
-
+	static void sendServerStatus(SOCKET socket, UINT32 status);
 	static void decodeYUV420SP(int rgb[], char yuv420sp[], int width, int height);
 	static int getRgbValueInRange(int value);
 	static int getRgb(int y, int u, int v);

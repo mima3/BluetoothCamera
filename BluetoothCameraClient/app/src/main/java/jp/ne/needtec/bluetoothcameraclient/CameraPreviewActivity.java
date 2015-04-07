@@ -2,33 +2,20 @@ package jp.ne.needtec.bluetoothcameraclient;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class CameraPreviewActivity extends Activity {
@@ -40,7 +27,7 @@ public class CameraPreviewActivity extends Activity {
     Timer mTimer;
     private static final int DataCode_Picture = 0xffff0001;
     private static final int DataCode_ServerStatus = 0xffff0002;
-    private boolean acceptServer = false;
+    private boolean acceptServer = true;
     CameraPreviewActivity self;
 
     BluetoothClient.BluetoothClientCallback clientCallback = new BluetoothClient.BluetoothClientCallback() {
@@ -165,10 +152,12 @@ public class CameraPreviewActivity extends Activity {
         //OnShotPreview時のbyte[]が渡ってくる
         @Override
         public void onPreviewFrame(byte[] bytes, Camera camera) {
+            if (!acceptServer) {
+                return;
+            }
             camera.setPreviewCallback(null);
             int w = camera.getParameters().getPreviewSize().width;
             int h = camera.getParameters().getPreviewSize().height;
-            //byte[] jpeg = getBitmapImageFromYUV(bytes, w, h);
             ByteBuffer buf = ByteBuffer.allocate(8 + 4 * 3);
             buf.putInt(DataCode_Picture);
             buf.putLong(bytes.length);
