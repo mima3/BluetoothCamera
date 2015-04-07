@@ -1,6 +1,10 @@
 #pragma once
 #include <pthread.h>
 
+/**
+ * @class CAutoLock
+ * @brief 自動ロッククラス
+ */
 class CAutoLock
 {
 public:

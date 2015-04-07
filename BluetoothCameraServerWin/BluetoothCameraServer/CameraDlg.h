@@ -30,9 +30,7 @@ protected:
 
 	virtual void PostNcDestroy();
 	virtual void OnCancel();
-	afx_msg void OnClose();
 	afx_msg void OnDestroy();
-public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBnClickedLightOn();
 	afx_msg void OnBnClickedLightOff();

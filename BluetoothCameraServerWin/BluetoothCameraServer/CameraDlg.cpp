@@ -39,15 +39,18 @@ void CCameraDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CCameraDlg, CDialogEx)
 	ON_MESSAGE(WM_BLUETOOTH_RECEIVED, &CCameraDlg::OnBluetoothReceived)
 	ON_WM_SIZE()
-	ON_WM_CLOSE()
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_LIGHT_ON, &CCameraDlg::OnBnClickedLightOn)
 	ON_BN_CLICKED(IDC_LIGHT_OFF, &CCameraDlg::OnBnClickedLightOff)
 END_MESSAGE_MAP()
 
 
-// CCameraDlg メッセージ ハンドラー
-afx_msg LRESULT CCameraDlg::OnBluetoothReceived(WPARAM wParam, LPARAM lParam) {
+/**
+ * Bluetoothからの画像取得
+ * @param [in] wParam HBITMAP
+ * @param [in] lParam NULL
+ */
+afx_msg LRESULT CCameraDlg::OnBluetoothReceived(WPARAM wParam, LPARAM /*lParam*/) {
 	CameraImageData* pData = (CameraImageData*)wParam;
 	HBITMAP hBmp = pData->hBitmap;
 
@@ -73,6 +76,24 @@ afx_msg LRESULT CCameraDlg::OnBluetoothReceived(WPARAM wParam, LPARAM lParam) {
 	BITMAP bm;
 	bmp.GetObject(sizeof(BITMAP), &bm);
 
+	this->m_pictCamera.SetWindowPos(
+		NULL,
+		0,
+		0,
+		bm.bmWidth,
+		bm.bmHeight,
+		SWP_NOMOVE | SWP_NOZORDER
+	);
+	this->m_pictCamera.GetWindowRect(&rect);
+	this->ScreenToClient(&rect);
+	this->SetWindowPos(
+		NULL,
+		0,
+		0,
+		bm.bmWidth + rect.left * 2 + 20,
+		bm.bmHeight + rect.top + 50,
+		SWP_NOMOVE | SWP_NOZORDER
+	);
 
 	//互換デバイスコンテキストの内容をpDCに転送
 	pDC->BitBlt(0, 0, bm.bmWidth, bm.bmHeight, &bmpDC, 0, 0, SRCCOPY);
@@ -99,6 +120,7 @@ void CCameraDlg::OnCancel()
 void CCameraDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
+	/*
 	CRect rect;
 	if (this->m_pictCamera.GetSafeHwnd()) {
 		this->m_pictCamera.GetWindowRect(&rect);
@@ -111,14 +133,9 @@ void CCameraDlg::OnSize(UINT nType, int cx, int cy)
 			cy - rect.top,
 			SWP_NOMOVE | SWP_NOZORDER
 			);
-	}
+	}*/
 }
 
-
-void CCameraDlg::OnClose()
-{
-	CDialogEx::OnClose();
-}
 
 
 void CCameraDlg::OnDestroy()
@@ -139,13 +156,18 @@ BOOL CCameraDlg::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 }
 
-
+/**
+ * 証明ONボタン
+ */
 void CCameraDlg::OnBnClickedLightOn()
 {
 	this->GetParent()->SendMessage(WM_CAMERA_LIGHT_STATUS, (WPARAM)&this->m_deviceAddr, 1);
 }
 
 
+/**
+* 証明OFFボタン
+*/
 void CCameraDlg::OnBnClickedLightOff()
 {
 	this->GetParent()->SendMessage(WM_CAMERA_LIGHT_STATUS, (WPARAM)&this->m_deviceAddr, 0);

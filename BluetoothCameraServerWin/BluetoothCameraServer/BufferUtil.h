@@ -1,4 +1,9 @@
 #pragma once
+
+/**
+ * @class CBufferUtil
+ * @brief バッファ操作用のユーティリティクラス
+ */
 class CBufferUtil
 {
 public:
