@@ -5,6 +5,7 @@
 #include "BluetoothAppDefine.h"
 #include "AutoLock.h"
 #include "BufferUtil.h"
+#include "BluetoothCameraNetInterface.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -93,7 +94,7 @@ bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKET socket, SOCKADDR_BTH s
 void CBluetoothCameraReceiver::sendServerStatus(SOCKET socket, UINT32 status) {
 	char buf[8];
 	size_t offset = 0;
-	CBufferUtil::SetUINT32Data(&buf[0], offset, 0xffff0002);
+	CBufferUtil::SetUINT32Data(&buf[0], offset, DATA_CODE_SERVER_STATUS);
 	CBufferUtil::SetUINT32Data(&buf[0], offset, status);
 	send(socket, buf, 8, 0);
 }
@@ -110,7 +111,7 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 		UINT32 tmp32;
 		size_t offset = 0;
 		tmp32 = CBufferUtil::GetUINT32Data(data, offset);
-		if (tmp32 != 0xffff0001) {
+		if (tmp32 != DATA_CODE_PICTURE) {
 			// 指定のコード以外の場合、予期せぬデータなので無視。
 			return;
 		}

@@ -25,8 +25,6 @@ public class CameraPreviewActivity extends Activity {
     private BluetoothClient bluetoothClient;
     private boolean connected = false;
     Timer mTimer;
-    private static final int DataCode_Picture = 0xffff0001;
-    private static final int DataCode_ServerStatus = 0xffff0002;
     private boolean acceptServer = true;
     CameraPreviewActivity self;
 
@@ -69,7 +67,7 @@ public class CameraPreviewActivity extends Activity {
             }
             int code = buf.getInt(0);
             switch (code) {
-                case DataCode_ServerStatus:
+                case BluetoothCameraNetInterface.DATA_CODE_SERVER_STATUS:
                     if (bytes < 8) {
                         return;
                     }
@@ -159,7 +157,7 @@ public class CameraPreviewActivity extends Activity {
             int w = camera.getParameters().getPreviewSize().width;
             int h = camera.getParameters().getPreviewSize().height;
             ByteBuffer buf = ByteBuffer.allocate(8 + 4 * 3);
-            buf.putInt(DataCode_Picture);
+            buf.putInt(BluetoothCameraNetInterface.DATA_CODE_PICTURE);
             buf.putLong(bytes.length);
             buf.putInt(w);   // プレビューの幅
             buf.putInt(h);  // プレビューの高さ

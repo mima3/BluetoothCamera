@@ -1,0 +1,3 @@
+#pragma once
+#define DATA_CODE_PICTURE			0xFFFF0001
+#define DATA_CODE_SERVER_STATUS		0xFFFF0002

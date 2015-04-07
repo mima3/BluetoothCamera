@@ -206,6 +206,7 @@
   <ItemGroup>
     <ClInclude Include="AutoLock.h" />
     <ClInclude Include="BluetoothAppDefine.h" />
+    <ClInclude Include="BluetoothCameraNetInterface.h" />
     <ClInclude Include="BluetoothCameraReceiver.h" />
     <ClInclude Include="BluetoothCameraServer.h" />
     <ClInclude Include="BluetoothCameraServerDlg.h" />
