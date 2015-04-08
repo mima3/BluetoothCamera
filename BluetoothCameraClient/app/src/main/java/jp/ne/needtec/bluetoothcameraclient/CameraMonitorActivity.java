@@ -42,6 +42,13 @@ public class CameraMonitorActivity extends Activity {
         }
     };
 
+    private void setServerStatus(int sts) {
+        ByteBuffer buf = ByteBuffer.allocate(8 + 4 * 3);
+        buf.putInt(BluetoothCameraNetInterface.DATA_CODE_SERVER_STATUS);
+        buf.putInt(sts);   // プレビューの幅
+        bluetoothServer.writeByte(buf.array());
+    }
+
     BluetoothServer.BluetoothServerCallback serverCallback = new BluetoothServer.BluetoothServerCallback() {
         Handler handlerReceivedImage = new Handler() {
             @Override
@@ -54,6 +61,7 @@ public class CameraMonitorActivity extends Activity {
         public void onConnected(BluetoothSocket socket) {
             remoteDevice = socket.getRemoteDevice();
             receivingData = new ReceivedData(remoteDevice.getAddress());
+            setServerStatus(1);
         }
 
         @Override
@@ -78,6 +86,7 @@ public class CameraMonitorActivity extends Activity {
                 offset += 4;
                 switch (code) {
                     case BluetoothCameraNetInterface.DATA_CODE_PICTURE: {
+                        setServerStatus(0);
                         receivingData.currentPos = 0;
                         receivingData.bufferSize = (int) buf.getLong(offset);
                         offset += 8;
@@ -113,7 +122,7 @@ public class CameraMonitorActivity extends Activity {
                     msg.what = 0;
                     msg.obj = bmp;
                     handlerReceivedImage.sendMessage(msg);
-
+                    setServerStatus(1);
                 }
             }
 
