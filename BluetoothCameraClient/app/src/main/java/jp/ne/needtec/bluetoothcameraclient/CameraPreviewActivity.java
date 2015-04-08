@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Timer;
 
 
@@ -207,8 +208,17 @@ public class CameraPreviewActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        //getMenuInflater().inflate(R.menu.menu_main, menu);
+        boolean ret = super.onCreateOptionsMenu(menu);
+        Camera.Parameters params = mCamera.getParameters();
+        List<Camera.Size> supportSize = params.getSupportedPreviewSizes();
+        int i = 0;
+        for (Camera.Size s: supportSize) {
+            String title = s.width + "x" + s.height;
+            menu.add(0 , Menu.FIRST + i , Menu.NONE , title);
+            ++i;
+        }
+        return ret;
     }
 
     @Override
@@ -216,14 +226,18 @@ public class CameraPreviewActivity extends Activity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        mCamera.setPreviewCallback(null);
+        mCamera.stopPreview();
+        int id = item.getItemId() - Menu.FIRST;
+        Camera.Parameters params = mCamera.getParameters();
+        List<Camera.Size> supportSize = params.getSupportedPreviewSizes();
+        Camera.Size sz = supportSize.get(id);
+        params.setPreviewSize(sz.width, sz.height);
+        mCamera.setParameters(params);
+        mCamera.startPreview();
+        mCamera.setPreviewCallback(previewCallback);
+        return true;
+        //return super.onOptionsItemSelected(item);
     }
 
     @Override
