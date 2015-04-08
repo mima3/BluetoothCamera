@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CBluetoothCameraServerDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CONNECT, &CBluetoothCameraServerDlg::OnBnClickedConnect)
 	ON_MESSAGE(WM_BLUETOOTH_RECEIVED, &CBluetoothCameraServerDlg::OnBluetoothReceived)
 	ON_MESSAGE(WM_BLUETOOTH_CONNECTED, &CBluetoothCameraServerDlg::OnBluetoothConnected)
+	ON_MESSAGE(WM_BLUETOOTH_CLOSED, &CBluetoothCameraServerDlg::OnBluetoothClosed)
 	ON_MESSAGE(WM_BLUETOOTH_ERROR, &CBluetoothCameraServerDlg::OnBluetoothError)
 	ON_MESSAGE(WM_CLOSE_CAMERA_WINDOW, &CBluetoothCameraServerDlg::OnCloseCameraWindow)
 	ON_MESSAGE(WM_CAMERA_LIGHT_STATUS, &CBluetoothCameraServerDlg::OnCameraLightStatus)
@@ -181,6 +182,9 @@ void CBluetoothCameraServerDlg::OnBnClickedConnect()
 afx_msg LRESULT CBluetoothCameraServerDlg::OnBluetoothReceived(WPARAM wParam, LPARAM lParam) {
 	//this->m_mapCameraWindows[];
 	CameraImageData* pData = (CameraImageData*)wParam;
+	if (!pData) {
+		return 0;
+	}
 	CWnd* pWnd = this->m_mapCameraWindows[pData->deviceId];
 	pWnd->SendMessage(WM_BLUETOOTH_RECEIVED, (WPARAM)pData, NULL);
 	delete pData;
@@ -199,6 +203,21 @@ afx_msg LRESULT CBluetoothCameraServerDlg::OnBluetoothConnected(WPARAM wParam, L
 		this->WriteLog(L"Connected: %I64x", *addr);
 
 		return 0;
+	}
+	return 0;
+}
+
+
+/**
+* Bluetooth�̐ؒf
+*/
+afx_msg LRESULT CBluetoothCameraServerDlg::OnBluetoothClosed(WPARAM wParam, LPARAM lParam) {
+	UINT64* addr = (UINT64*)wParam;
+	if (addr != NULL) {
+		if (this->m_mapCameraWindows[*addr]) {
+			this->m_mapCameraWindows[*addr]->DestroyWindow();
+			this->m_mapCameraWindows.erase(*addr);
+		}
 	}
 	return 0;
 }

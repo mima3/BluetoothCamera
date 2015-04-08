@@ -54,6 +54,9 @@ void* CBluetoothServer::readThread(void* param) {
 			return NULL;
 		}
 		const ReadwriteThreadData* data = findReadWriteThreadByThread(pid);
+		if (data == NULL) {
+			return NULL;
+		}
 		if (recvSize == 0) {
 			// close
 			data->pCallback->OnConnectionClosed(pParamRW->saddr);
@@ -330,4 +333,5 @@ void CBluetoothServer::StopService() {
 void CBluetoothServer::CloseSocket(UINT64 addr) {
 	const ReadwriteThreadData* pData = CBluetoothServer::findReadWriteThreadByAddress(addr);
 	closesocket(pData->param->socket);
+	removeReadWriteThread(pData->id);
 }

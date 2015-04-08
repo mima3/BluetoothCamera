@@ -19,6 +19,7 @@ public class BluetoothClient {
         public void onConnected(BluetoothClient client);
         public void onClose();
         public void onReceive(byte[] buffer, int bytes);
+        public void onError(String errorMsg);
     }
 
     private ReadWriteThread readWriteThread = null;
@@ -122,9 +123,11 @@ public class BluetoothClient {
             } catch (IOException connectException) {
                 try {
                     Log.e("BluetoothClient", connectException.getMessage());
+                    callback.onError(connectException.getMessage());
                     mmSocket.close();
                 } catch (IOException e) {
                     Log.e("BluetoothClient", e.getMessage());
+                    callback.onError(e.getMessage());
                 }
                 return;
             }

@@ -35,14 +35,14 @@ public class CameraPreviewActivity extends Activity {
         Handler handlerClose = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(self);
-            alertDialog.setMessage((String)msg.obj);
-            alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                public void onCancel(DialogInterface dialog) {
-                    self.finish();
-                }
-            });
-            alertDialog.show();
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(self);
+                alertDialog.setMessage((String)msg.obj);
+                alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    public void onCancel(DialogInterface dialog) {
+                        self.finish();
+                    }
+                });
+                alertDialog.show();
             }
         };
 
@@ -54,14 +54,24 @@ public class CameraPreviewActivity extends Activity {
 
         @Override
         public void onClose() {
-            connected = false;
             bluetoothClient = null;
+            if (connected) {
+                connected = false;
+                Message msg = new Message();
+                msg.what = 0;
+                msg.obj = "切断されました。";
+                handlerClose.sendMessage(msg);
+            }
+        }
+        @Override
+        public void onError(String errorMsg) {
+            bluetoothClient = null;
+            connected = false;
             Message msg = new Message();
             msg.what = 0;
-            msg.obj = "切断されました。";
+            msg.obj = errorMsg;
             handlerClose.sendMessage(msg);
         }
-
         @Override
         public void onReceive(byte[] buffer, int bytes) {
             ByteBuffer buf = ByteBuffer.wrap(buffer);
@@ -103,6 +113,7 @@ public class CameraPreviewActivity extends Activity {
                 default:
                     break;
             }
+
         }
     };
 
@@ -176,6 +187,9 @@ public class CameraPreviewActivity extends Activity {
             if (!acceptServer) {
                 return;
             }
+            if (!connected) {
+                return;
+            }
             camera.setPreviewCallback(null);
             int w = camera.getParameters().getPreviewSize().width;
             int h = camera.getParameters().getPreviewSize().height;
@@ -212,7 +226,15 @@ public class CameraPreviewActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    protected void onDestroy () {
+        if (connected) {
+            connected = false;
+            bluetoothClient.close();
+        }
+        acceptServer = true;
+        super.onDestroy();
+    }
 }
 
 /**

@@ -40,10 +40,10 @@ protected:
 
 	afx_msg LRESULT OnBluetoothReceived(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnBluetoothConnected(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnBluetoothClosed(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnBluetoothError(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCloseCameraWindow(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCameraLightStatus(WPARAM wParam, LPARAM lParam);
-
 	afx_msg void OnBnClickedConnect();
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);

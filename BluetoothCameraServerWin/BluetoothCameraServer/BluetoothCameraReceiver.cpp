@@ -184,8 +184,11 @@ void CBluetoothCameraReceiver::OnConnectionClosed(SOCKADDR_BTH saddr) {
 	UINT64 addr = GET_SAP(saddr.btAddr);
 
 	CAutoLock lock(&this->m_mutexlock);
-	delete this->m_mapReceived[addr];
-	this->m_mapReceived.erase(addr);
+	if (this->m_mapReceived[addr]) {
+		delete this->m_mapReceived[addr];
+		this->m_mapReceived.erase(addr);
+	}
+	::SendMessage(this->m_targethWnd, WM_BLUETOOTH_CLOSED, (WPARAM)&addr, NULL);
 }
 
 
