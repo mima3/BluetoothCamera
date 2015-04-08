@@ -1,46 +1,43 @@
 package jp.ne.needtec.bluetoothcameraclient;
 
-import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 /**
- * Created by m.ita on 2015/03/27.
+ * Created by M.ita on 2015/04/08.
  */
-public class BluetoothClient {
-    public interface BluetoothClientCallback {
-        public void onConnected(BluetoothClient client);
+public class BluetoothServer {
+    public interface BluetoothServerCallback {
+        public void onConnected(BluetoothSocket socket);
         public void onClose();
         public void onReceive(byte[] buffer, int bytes);
         public void onError(String errorMsg);
     }
 
     private ReadWriteThread readWriteThread = null;
-    private ConnectThread connThread = null;
-    private BluetoothDevice connectDevice;
-    private BluetoothClientCallback callback;
+    private AcceptThread connThread = null;
+    private BluetoothServerCallback callback;
 
     /**
      * コンストラクタ
-     * @param device 接続対象のペアリング中のBluetoothDevice
      */
-    BluetoothClient(BluetoothDevice device) {
-       this.connectDevice = device;
+    BluetoothServer() {
     }
 
     /**
      * 接続を行う
      * @param cb コールバッククラス
      */
-    public void connect(BluetoothClientCallback cb) {
-        this.connThread = new ConnectThread(this.connectDevice);
+    public void accept(BluetoothServerCallback cb) {
+        this.connThread = new AcceptThread(UUID.fromString(BluetoothCameraNetInterface.SERVICE_GUID));
         this.connThread.start();
         this.callback = cb;
     }
@@ -96,40 +93,35 @@ public class BluetoothClient {
         Log.i("BluetoothClient", "Connection");
         this.readWriteThread = new ReadWriteThread(socket);
         this.readWriteThread.start();
-        this.callback.onConnected(this);
+        this.callback.onConnected(socket);
     }
 
     /**
      * 接続用のスレッドクラス
      */
-    private class ConnectThread extends Thread {
-        private final BluetoothSocket mSocket;
-        private final UUID serviceUUID = UUID.fromString(BluetoothCameraNetInterface.SERVICE_GUID);
+    private class AcceptThread extends Thread {
+        private final BluetoothServerSocket mSocket;
+        private final BluetoothAdapter mAdapter;
 
-        public ConnectThread(BluetoothDevice device) {
-            BluetoothSocket tmp = null;
+        public AcceptThread(UUID serviceUUID) {
+            BluetoothServerSocket tmp = null;
+            this.mAdapter = BluetoothAdapter.getDefaultAdapter();
             try {
-                tmp = device.createRfcommSocketToServiceRecord(serviceUUID);
+                tmp = this.mAdapter.listenUsingRfcommWithServiceRecord("Bluetooth Camera Monitor", serviceUUID);
             } catch (IOException e) {
                 Log.e("BluetoothClient", e.getMessage());
             }
             this.mSocket = tmp;
         }
         public void run() {
+            BluetoothSocket socket = null;
             try {
-                this.mSocket.connect();
-            } catch (IOException connectException) {
-                try {
-                    Log.e("BluetoothClient", connectException.getMessage());
-                    callback.onError(connectException.getMessage());
-                    mSocket.close();
-                } catch (IOException e) {
-                    Log.e("BluetoothClient", e.getMessage());
-                    callback.onError(e.getMessage());
-                }
-                return;
+                socket = this.mSocket.accept();
+            } catch (Exception e) {
+                Log.e("BluetoothServer", e.getMessage());
+                callback.onError(e.getMessage());
             }
-            manageConnectedSocket(this.mSocket);
+            manageConnectedSocket(socket);
         }
 
         /**
@@ -143,6 +135,7 @@ public class BluetoothClient {
             }
         }
     }
+
     /**
      * 接続確立時のデータ送受信用のThread
      */

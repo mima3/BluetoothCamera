@@ -12,13 +12,13 @@ struct CameraImageData {
 };
 
 /**
-* @class CRecevicedData
+* @class CReceivedData
 * @brief 受信データのクラス
 */
-class CRecevicedData {
+class CReceivedData {
 public:
-	CRecevicedData(UINT64 addr);
-	~CRecevicedData();
+	CReceivedData(UINT64 addr);
+	~CReceivedData();
 
 	enum eStatus {
 		kStatus_None = 0,		// 未受信
@@ -49,7 +49,7 @@ public:
 	void OnConnectionClosed(SOCKADDR_BTH saddr);
 
 private:
-	map<UINT64, CRecevicedData*> m_mapReceived;
+	map<UINT64, CReceivedData*> m_mapReceived;
 	pthread_mutex_t m_mutexlock;
 	pthread_mutexattr_t m_mutexattr;
 	HWND m_targethWnd;

@@ -220,8 +220,8 @@ void* CBluetoothServer::connectitonThread(void *param)
 	WSAQUERYSET service;
 	memset(&service, 0, sizeof(service));
 	service.dwSize = sizeof(service);
-	service.lpszServiceInstanceName = _T("Accelerometer Data...");
-	service.lpszComment = _T("Pushing data to PC");
+	service.lpszServiceInstanceName = _T("Bluetooth Camera Monitor");
+	service.lpszComment = _T("This service is monitoring by bluetooth.");
 
 
 	service.lpServiceClassId = &serviceId;

@@ -21,7 +21,7 @@ static const int GREEN_ELEMENT_SHIFT = 2;
 static const int BLUE_ELEMENT_SHIFT = 10;
 static const int ALPHA_ELEMENT_FULL = 0xff000000;
 
-CRecevicedData::CRecevicedData(UINT64 addr) :
+CReceivedData::CReceivedData(UINT64 addr) :
 	m_Addr(addr),
 	m_status(kStatus_None),
 	m_BufferSize(0),
@@ -33,7 +33,7 @@ CRecevicedData::CRecevicedData(UINT64 addr) :
 
 }
 
-CRecevicedData::~CRecevicedData() {
+CReceivedData::~CReceivedData() {
 	if (this->m_buff) {
 		delete this->m_buff;
 	}
@@ -57,7 +57,7 @@ CBluetoothCameraReceiver::~CBluetoothCameraReceiver()
 {
 	pthread_mutexattr_destroy(&this->m_mutexattr);
 	pthread_mutex_destroy(&this->m_mutexlock);
-	for (map<UINT64, CRecevicedData*>::iterator itr = m_mapReceived.begin();
+	for (map<UINT64, CReceivedData*>::iterator itr = m_mapReceived.begin();
 		itr != m_mapReceived.end(); ++itr) {
 		delete itr->second;
 	}
@@ -84,7 +84,7 @@ bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKET socket, SOCKADDR_BTH s
 	UINT64 addr = GET_SAP(saddr.btAddr);
 	::SendMessage(this->m_targethWnd, WM_BLUETOOTH_CONNECTED, (WPARAM)&addr, NULL);
 
-	CRecevicedData* pData = new CRecevicedData(addr);
+	CReceivedData* pData = new CReceivedData(addr);
 	this->m_mapReceived[addr] = pData;
 
 	CBluetoothCameraSender::SetServerStatus(socket, 1);
@@ -98,10 +98,10 @@ bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKET socket, SOCKADDR_BTH s
 void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH saddr, char* data, int recvSize) {
 	UINT64 addr = GET_SAP(saddr.btAddr);
 	CAutoLock lock(&this->m_mutexlock);
-	CRecevicedData *pRcvData = this->m_mapReceived[addr];
+	CReceivedData *pRcvData = this->m_mapReceived[addr];
 
 	//
-	if (pRcvData->m_status == CRecevicedData::kStatus_None) {
+	if (pRcvData->m_status == CReceivedData::kStatus_None) {
 		// ‰‰ñ‚ÌŽóM
 		UINT32 tmp32;
 		size_t offset = 0;
@@ -121,12 +121,12 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 		}
 		pRcvData->m_buff = new char[pRcvData->m_BufferSize];
 		pRcvData->m_currentPos = 0;
-		pRcvData->m_status = CRecevicedData::kStatus_Receiving;
+		pRcvData->m_status = CReceivedData::kStatus_Receiving;
 		recvSize -= (offset);
 		data += (offset);
 	}
 
-	if (pRcvData->m_status == CRecevicedData::kStatus_Receiving) {
+	if (pRcvData->m_status == CReceivedData::kStatus_Receiving) {
 		UINT64 cpSize = recvSize;
 		if (cpSize > pRcvData->m_BufferSize - pRcvData->m_currentPos) {
 			cpSize = pRcvData->m_BufferSize - pRcvData->m_currentPos;
@@ -164,7 +164,7 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 
 			delete pRcvData->m_buff;
 			pRcvData->m_buff = NULL;
-			pRcvData->m_status = CRecevicedData::kStatus_None;
+			pRcvData->m_status = CReceivedData::kStatus_None;
 			pRcvData->m_BufferSize = 0;
 			pRcvData->m_currentPos = 0;
 			pRcvData->m_width = 0;

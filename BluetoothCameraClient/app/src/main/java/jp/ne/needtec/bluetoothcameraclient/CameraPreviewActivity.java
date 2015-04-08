@@ -21,7 +21,10 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Timer;
 
-
+/**
+ * カメラのプレビュー画面
+ * この画面で表示したプレビューをBluetooth経由で転送する
+ */
 public class CameraPreviewActivity extends Activity {
 
     private Preview mPreview;
@@ -32,7 +35,11 @@ public class CameraPreviewActivity extends Activity {
     private boolean acceptServer = true;
     CameraPreviewActivity self;
 
+    /**
+     * BluetoothClientからのコールバック
+     */
     BluetoothClient.BluetoothClientCallback clientCallback = new BluetoothClient.BluetoothClientCallback() {
+
         Handler handlerClose = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -50,7 +57,6 @@ public class CameraPreviewActivity extends Activity {
         @Override
         public void onConnected(BluetoothClient client) {
             connected = true;
-
         }
 
         @Override
@@ -64,6 +70,7 @@ public class CameraPreviewActivity extends Activity {
                 handlerClose.sendMessage(msg);
             }
         }
+
         @Override
         public void onError(String errorMsg) {
             bluetoothClient = null;
@@ -73,6 +80,7 @@ public class CameraPreviewActivity extends Activity {
             msg.obj = errorMsg;
             handlerClose.sendMessage(msg);
         }
+
         @Override
         public void onReceive(byte[] buffer, int bytes) {
             ByteBuffer buf = ByteBuffer.wrap(buffer);
@@ -130,20 +138,6 @@ public class CameraPreviewActivity extends Activity {
         //SurfaceView
         mPreview = new Preview(this);
         setContentView(mPreview);
-
-        mPreview.setOnClickListener(onSurfaceClickListener);
-
-        /*
-        mTimer = new Timer(true);
-        mTimer.schedule( new TimerTask(){
-            @Override
-            public void run() {
-                if (connected) {
-                    mCamera.setOneShotPreviewCallback(previewCallback);
-                }
-            }
-        }, 100, 2500);
-        */
     }
 
     @Override
@@ -166,20 +160,10 @@ public class CameraPreviewActivity extends Activity {
             mCamera = null;
         }
     }
-    //Surfaceをクリックした時
-    private View.OnClickListener onSurfaceClickListener = new View.OnClickListener(){
-        @Override
-        public void onClick(View view){
-            if(mCamera != null){
-                //AutoFocusを実行
-                //myCamera.autoFocus(autoFocusCallback);
-                //mCamera.setOneShotPreviewCallback(previewCallback);
-            }
-        }
 
-    };
-
-    //切り取った時（ここで撮影、各種画像処理を行う）
+    /**
+     * プレビューのコールバック
+     */
     private Camera.PreviewCallback previewCallback = new Camera.PreviewCallback(){
 
         //OnShotPreview時のbyte[]が渡ってくる
@@ -205,6 +189,12 @@ public class CameraPreviewActivity extends Activity {
         }
     };
 
+    /**
+     * オプションメニューの作成
+     * サポートしているプレビューの一覧を設定する
+     * @param menu メニュー
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
