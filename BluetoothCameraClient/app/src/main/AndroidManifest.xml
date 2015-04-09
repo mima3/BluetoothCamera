@@ -22,10 +22,12 @@
         </activity>
         <activity
             android:name=".CameraPreviewActivity"
+            android:screenOrientation="landscape"
             android:label="@string/title_activity_camera_preview" >
         </activity>
         <activity
             android:name=".CameraMonitorActivity"
+            android:screenOrientation="landscape"
             android:label="@string/title_activity_camera_monitor" >
         </activity>
     </application>

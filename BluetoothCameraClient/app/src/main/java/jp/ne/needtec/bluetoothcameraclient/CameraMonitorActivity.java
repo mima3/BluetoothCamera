@@ -5,29 +5,32 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.nio.ByteBuffer;
 
 
 public class CameraMonitorActivity extends Activity {
     private BluetoothServer bluetoothServer;
-    private BluetoothDevice remoteDevice;
     private ReceivedData receivingData;
     private ImageView monitor;
+    private boolean accepted = false;
+    private CameraMonitorActivity self;
+    private TextView textDevice;
+
 
     enum ReceivedDataStatus {
         None,	      // 未受信
         Receiving	  // 現在データを受信中
-    };
+    }
+
     private class ReceivedData {
         public String deviceAddress;
         public ReceivedDataStatus status = ReceivedDataStatus.None;
@@ -40,7 +43,7 @@ public class CameraMonitorActivity extends Activity {
             this.deviceAddress = deviceAddress;
             this.currentPos = 0;
         }
-    };
+    }
 
     private void setServerStatus(int sts) {
         ByteBuffer buf = ByteBuffer.allocate(8 + 4 * 3);
@@ -56,21 +59,58 @@ public class CameraMonitorActivity extends Activity {
                 monitor.setImageBitmap((Bitmap)msg.obj);
             }
         };
-
+        Handler handlerClose = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(self);
+                alertDialog.setMessage((String)msg.obj);
+                alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    public void onCancel(DialogInterface dialog) {
+                        self.finish();
+                    }
+                });
+                alertDialog.show();
+            }
+        };
+        Handler handlerConnected = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                textDevice.setText((String)msg.obj);
+            }
+        };
         @Override
         public void onConnected(BluetoothSocket socket) {
-            remoteDevice = socket.getRemoteDevice();
+            BluetoothDevice remoteDevice = socket.getRemoteDevice();
             receivingData = new ReceivedData(remoteDevice.getAddress());
+            accepted = true;
             setServerStatus(1);
+            Message msg = new Message();
+            msg.what = 0;
+            msg.obj = remoteDevice.getName() + ' ' + remoteDevice.getAddress();
+            handlerConnected.sendMessage(msg);
         }
 
         @Override
         public void onClose() {
             receivingData = null;
+            bluetoothServer.close();
+            if (accepted) {
+                accepted = false;
+                Message msg = new Message();
+                msg.what = 0;
+                msg.obj = "切断されました。";
+                handlerClose.sendMessage(msg);
+            }
         }
 
         @Override
         public void onError(String errorMsg) {
+            bluetoothServer = null;
+            accepted = false;
+            Message msg = new Message();
+            msg.what = 0;
+            msg.obj = errorMsg;
+            handlerClose.sendMessage(msg);
         }
 
         @Override
@@ -157,13 +197,23 @@ public class CameraMonitorActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        self = this;
         this.bluetoothServer = new BluetoothServer();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_monitor);
         this.bluetoothServer.accept(serverCallback);
         this.monitor = (ImageView)this.findViewById(R.id.id_image_monitor);
+        this.textDevice = (TextView)this.findViewById(R.id.id_text_device);
     }
 
+    @Override
+    protected void onDestroy () {
+        if (accepted) {
+            accepted = false;
+            bluetoothServer.close();
+        }
+        super.onDestroy();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

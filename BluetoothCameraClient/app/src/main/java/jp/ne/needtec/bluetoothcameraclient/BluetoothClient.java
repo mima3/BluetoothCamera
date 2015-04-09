@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 /**
+ * Bluetoothのクライアント側の処理
  * Created by m.ita on 2015/03/27.
  */
 public class BluetoothClient {

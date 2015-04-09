@@ -5,12 +5,14 @@ import android.bluetooth.BluetoothDevice;
 import java.util.HashMap;
 
 /**
+ * BluetoothClientの管理クラス
+ * このクラスを経由してActivity間でBluetoothクラスの受け渡しを行う
  * Created by m.ita on 2015/03/31.
  */
 public class BluetoothClientManager {
     private static BluetoothClientManager instance;
     private static int nextId = 1;
-    private static HashMap<Integer, BluetoothClient> clients = new HashMap<Integer, BluetoothClient>();
+    private static HashMap<Integer, BluetoothClient> clients = new HashMap<>();
     private BluetoothClientManager() {
         instance = null;
     }

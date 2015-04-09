@@ -5,8 +5,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -34,7 +32,6 @@ public class MainActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 BluetoothDevice device = (BluetoothDevice)pairedDeviceList[position];
-                BluetoothClientManager mgr = BluetoothClientManager.getInstance();
                 // インテントの生成
                 Intent intent = new Intent(MainActivity.this, CameraPreviewActivity.class);
                 int clientId = BluetoothClientManager.createClient(device);

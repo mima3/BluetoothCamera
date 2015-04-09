@@ -146,6 +146,24 @@ public class CameraPreviewActivity extends Activity {
         // Open the default i.e. the first rear facing camera.
         mCamera = Camera.open();
         mPreview.setCamera(mCamera);
+
+        // もっとも小さいサイズを選択する
+        Camera.Parameters params = mCamera.getParameters();
+        List<Camera.Size> supportSize = params.getSupportedPreviewSizes();
+        int minWidth = 999999;
+        int minIx = 0;
+        int i = 0;
+        for (Camera.Size sz: supportSize) {
+            if (sz.width < minWidth) {
+                minWidth = sz.width;
+                minIx = i;
+            }
+            ++i;
+        }
+        Camera.Size sz = supportSize.get(minIx);
+        params.setPreviewSize(sz.width, sz.height);
+        mCamera.setParameters(params);
+
         mCamera.setPreviewCallback(previewCallback);
     }
     @Override

@@ -1,6 +1,7 @@
 package jp.ne.needtec.bluetoothcameraclient;
 
 /**
+ * C++側と共通の定義
  * Created by mitagaki on 2015/04/07.
  */
 public class BluetoothCameraNetInterface {
