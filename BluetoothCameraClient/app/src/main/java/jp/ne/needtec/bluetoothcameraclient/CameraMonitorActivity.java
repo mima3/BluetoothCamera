@@ -39,6 +39,7 @@ public class CameraMonitorActivity extends Activity {
         public byte[] buffer;
         public int width = 0;
         public int height = 0;
+        public int format = 0;
         ReceivedData(String deviceAddress) {
             this.deviceAddress = deviceAddress;
             this.currentPos = 0;
@@ -135,12 +136,14 @@ public class CameraMonitorActivity extends Activity {
                     case BluetoothCameraNetInterface.DATA_CODE_PICTURE: {
                         setServerStatus(0);
                         receivingData.currentPos = 0;
-                        receivingData.bufferSize = (int) buf.getLong(offset);
-                        offset += 8;
                         receivingData.width = buf.getInt(offset);
                         offset += 4;
                         receivingData.height = buf.getInt(offset);
                         offset += 4;
+                        receivingData.format = buf.getInt(offset);
+                        offset += 4;
+                        receivingData.bufferSize = (int) buf.getLong(offset);
+                        offset += 8;
                         receivingData.buffer = new byte[receivingData.bufferSize];
                         receivingData.status = ReceivedDataStatus.Receiving;
                         break;
@@ -159,7 +162,12 @@ public class CameraMonitorActivity extends Activity {
                     // 全て受信
                     int[] rgb = new int[(receivingData.width * receivingData.height)];
                     Bitmap bmp = Bitmap.createBitmap(receivingData.width, receivingData.height, Bitmap.Config.ARGB_8888);
-                    decodeYUV420SP(rgb, receivingData.buffer, receivingData.width, receivingData.height);
+
+                    if (receivingData.format == BluetoothCameraNetInterface.IMAGE_FORMAT_YUV420) {
+                        decodeYUV420SP(rgb, receivingData.buffer, receivingData.width, receivingData.height);
+                    } else {
+                        // TODO Error.
+                    }
                     bmp.setPixels(rgb, 0, receivingData.width, 0, 0, receivingData.width, receivingData.height);
                     receivingData.currentPos = 0;
                     receivingData.bufferSize = 0;

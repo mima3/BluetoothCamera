@@ -124,9 +124,11 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 		// サーバの受信を無効にする
 		CBluetoothCameraSender::SetServerStatus(socket, 0);
 
-		pRcvData->m_BufferSize = (size_t)CBufferUtil::GetUINT64Data(data, offset);
 		pRcvData->m_width = CBufferUtil::GetUINT32Data(data, offset);
 		pRcvData->m_height = CBufferUtil::GetUINT32Data(data, offset);
+		pRcvData->m_format = CBufferUtil::GetUINT32Data(data, offset);
+
+		pRcvData->m_BufferSize = (size_t)CBufferUtil::GetUINT64Data(data, offset);
 		if (pRcvData->m_buff) {
 			delete pRcvData;
 		}
@@ -164,7 +166,12 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 			lpBitmap->bmiHeader.biBitCount = 32;
 			lpBitmap->bmiHeader.biCompression = BI_RGB;
 			HBITMAP hBmp = CreateDIBSection(NULL, lpBitmap, DIB_RGB_COLORS, (void**)&rgb, NULL, 0);
-			CBluetoothCameraReceiver::decodeYUV420SP(rgb, pRcvData->m_buff, pRcvData->m_width, pRcvData->m_height);
+			if (pRcvData->m_format == IMAGE_FORMAT_YUV420) {
+				CBluetoothCameraReceiver::decodeYUV420SP(rgb, pRcvData->m_buff, pRcvData->m_width, pRcvData->m_height);
+			}
+			else {
+				// TODO Error.
+			}
 			delete lpBitmap;
 
 			CameraImageData* pData = new CameraImageData;
@@ -236,7 +243,7 @@ void CBluetoothCameraReceiver::decodeYUV420SP(int rgb[], char yuv420sp[], int wi
 			if (g < 0) g = 0; else if (g > 262143) g = 262143;
 			if (b < 0) b = 0; else if (b > 262143) b = 262143;
 
-			rgb[i + (height - j) * width] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
+			rgb[i + (height - j - 1) * width] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
 		}
 	}
 }

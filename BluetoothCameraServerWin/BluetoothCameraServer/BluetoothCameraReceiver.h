@@ -31,6 +31,7 @@ public:
 	char* m_buff;
 	UINT32 m_width;
 	UINT32 m_height;
+	UINT32 m_format;
 };
 
 /**

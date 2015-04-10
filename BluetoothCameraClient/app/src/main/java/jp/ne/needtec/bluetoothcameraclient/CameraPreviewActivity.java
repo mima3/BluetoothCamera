@@ -209,12 +209,13 @@ public class CameraPreviewActivity extends Activity {
             camera.setPreviewCallback(null);
             int w = camera.getParameters().getPreviewSize().width;
             int h = camera.getParameters().getPreviewSize().height;
-            ByteBuffer buf = ByteBuffer.allocate(4 + 4 + 8 + 4 + 4);
+            ByteBuffer buf = ByteBuffer.allocate(4 * 5 + 8);
             buf.putInt(BluetoothCameraNetInterface.DATA_CODE_PICTURE);
             buf.putInt(BluetoothCameraNetInterface.DATA_VERSION);
-            buf.putLong(bytes.length);
             buf.putInt(w);   // プレビューの幅
             buf.putInt(h);  // プレビューの高さ
+            buf.putInt(BluetoothCameraNetInterface.IMAGE_FORMAT_YUV420);  // 画像の書式
+            buf.putLong(bytes.length);
             bluetoothClient.writeByte(buf.array());
             bluetoothClient.writeByte(bytes);
             camera.setPreviewCallback(this);
