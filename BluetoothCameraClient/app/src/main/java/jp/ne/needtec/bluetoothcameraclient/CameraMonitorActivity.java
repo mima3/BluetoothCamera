@@ -46,8 +46,9 @@ public class CameraMonitorActivity extends Activity {
     }
 
     private void setServerStatus(int sts) {
-        ByteBuffer buf = ByteBuffer.allocate(8 + 4 * 3);
+        ByteBuffer buf = ByteBuffer.allocate(4 + 4 + 4);
         buf.putInt(BluetoothCameraNetInterface.DATA_CODE_SERVER_STATUS);
+        buf.putInt(BluetoothCameraNetInterface.DATA_VERSION);
         buf.putInt(sts);   // プレビューの幅
         bluetoothServer.writeByte(buf.array());
     }
@@ -124,6 +125,12 @@ public class CameraMonitorActivity extends Activity {
                 }
                 int code = buf.getInt(offset);
                 offset += 4;
+                int version = buf.getInt(offset);
+                offset += 4;
+                if (version != BluetoothCameraNetInterface.DATA_VERSION) {
+                    // TODO エラーメッセージ
+                    return;
+                }
                 switch (code) {
                     case BluetoothCameraNetInterface.DATA_CODE_PICTURE: {
                         setServerStatus(0);

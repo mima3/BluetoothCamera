@@ -110,6 +110,17 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 			// 指定のコード以外の場合、予期せぬデータなので無視。
 			return;
 		}
+		// Version チェック
+		tmp32 = CBufferUtil::GetUINT32Data(data, offset);
+		if (tmp32 != DATA_VERSION) {
+			BluetoothServerError error;
+			error.errorcode = 0xA0000001;
+			error.message = L"クライアントとサーバーのVersionが異なります";
+			OnErrorCallback(error);
+			return;
+		}
+
+
 		// サーバの受信を無効にする
 		CBluetoothCameraSender::SetServerStatus(socket, 0);
 

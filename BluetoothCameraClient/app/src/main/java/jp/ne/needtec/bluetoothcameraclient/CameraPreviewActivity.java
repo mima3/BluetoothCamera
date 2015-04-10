@@ -84,16 +84,28 @@ public class CameraPreviewActivity extends Activity {
         @Override
         public void onReceive(byte[] buffer, int bytes) {
             ByteBuffer buf = ByteBuffer.wrap(buffer);
-            if (bytes < 4) {
+            int offset = 0;
+            if (bytes < 8) {
                 return;
             }
-            int code = buf.getInt(0);
+            int code = buf.getInt(offset);
+            offset += 4;
+
+            int version = buf.getInt(offset);
+            if (version != BluetoothCameraNetInterface.DATA_VERSION) {
+                // TODO エラーメッセージ
+                return;
+            }
+            offset += 4;
+
             switch (code) {
                 case BluetoothCameraNetInterface.DATA_CODE_SERVER_STATUS: {
-                    if (bytes < 8) {
+                    if (bytes < offset + 4) {
                         return;
                     }
-                    int status = buf.getInt(4);
+                    int status = buf.getInt(offset);
+                    offset += 4;
+
                     if (status == 0) {
                         acceptServer = false;
                     } else {
@@ -102,10 +114,11 @@ public class CameraPreviewActivity extends Activity {
                     break;
                 }
                 case BluetoothCameraNetInterface.DATA_CODE_SET_LIGHT_STATUS: {
-                    if (bytes < 8) {
+                    if (bytes < offset + 4) {
                         return;
                     }
-                    int status = buf.getInt(4);
+                    int status = buf.getInt(offset);
+                    offset += 4;
                     PackageManager pm = getPackageManager();
                     if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
                         Camera.Parameters params = mCamera.getParameters();
@@ -196,8 +209,9 @@ public class CameraPreviewActivity extends Activity {
             camera.setPreviewCallback(null);
             int w = camera.getParameters().getPreviewSize().width;
             int h = camera.getParameters().getPreviewSize().height;
-            ByteBuffer buf = ByteBuffer.allocate(8 + 4 * 3);
+            ByteBuffer buf = ByteBuffer.allocate(4 + 4 + 8 + 4 + 4);
             buf.putInt(BluetoothCameraNetInterface.DATA_CODE_PICTURE);
+            buf.putInt(BluetoothCameraNetInterface.DATA_VERSION);
             buf.putLong(bytes.length);
             buf.putInt(w);   // プレビューの幅
             buf.putInt(h);  // プレビューの高さ
