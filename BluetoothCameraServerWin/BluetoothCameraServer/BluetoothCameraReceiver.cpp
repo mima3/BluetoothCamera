@@ -96,7 +96,7 @@ bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKET socket, SOCKADDR_BTH s
 void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH saddr, char* data, int recvSize) {
 	UINT64 addr = GET_SAP(saddr.btAddr);
 	CAutoLock lock(&this->m_mutexlock);
-	CReceivedData *pRcvData = this->m_mapReceived[addr];
+	CReceivedData* pRcvData = this->m_mapReceived[addr];
 
 	//
 	if (pRcvData->m_status == CReceivedData::kStatus_None) {
@@ -128,7 +128,7 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 
 		pRcvData->m_BufferSize = (size_t)CBufferUtil::GetUINT64Data(data, offset);
 		if (pRcvData->m_buff) {
-			delete pRcvData;
+			delete pRcvData->m_buff;
 		}
 		pRcvData->m_buff = new char[pRcvData->m_BufferSize];
 		pRcvData->m_currentPos = 0;

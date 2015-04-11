@@ -5,6 +5,11 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BluetoothCameraServer", "BluetoothCameraServer\BluetoothCameraServer.vcxproj", "{13A5E802-BDE1-485C-90F8-8885E074AA5B}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{127C014C-D579-42FC-A2FD-34212B4D9113}"
+	ProjectSection(ProjectDependencies) = postProject
+		{13A5E802-BDE1-485C-90F8-8885E074AA5B} = {13A5E802-BDE1-485C-90F8-8885E074AA5B}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -17,10 +22,16 @@ Global
 		{13A5E802-BDE1-485C-90F8-8885E074AA5B}.Debug|x64.Build.0 = Debug|x64
 		{13A5E802-BDE1-485C-90F8-8885E074AA5B}.Debug|x86.ActiveCfg = Debug|Win32
 		{13A5E802-BDE1-485C-90F8-8885E074AA5B}.Debug|x86.Build.0 = Debug|Win32
-		{13A5E802-BDE1-485C-90F8-8885E074AA5B}.Release|x64.ActiveCfg = Release|x64
-		{13A5E802-BDE1-485C-90F8-8885E074AA5B}.Release|x64.Build.0 = Release|x64
+		{13A5E802-BDE1-485C-90F8-8885E074AA5B}.Release|x64.ActiveCfg = Release|Win32
+		{13A5E802-BDE1-485C-90F8-8885E074AA5B}.Release|x64.Build.0 = Release|Win32
 		{13A5E802-BDE1-485C-90F8-8885E074AA5B}.Release|x86.ActiveCfg = Release|Win32
 		{13A5E802-BDE1-485C-90F8-8885E074AA5B}.Release|x86.Build.0 = Release|Win32
+		{127C014C-D579-42FC-A2FD-34212B4D9113}.Debug|x64.ActiveCfg = Debug
+		{127C014C-D579-42FC-A2FD-34212B4D9113}.Debug|x86.ActiveCfg = Debug
+		{127C014C-D579-42FC-A2FD-34212B4D9113}.Release|x64.ActiveCfg = Release
+		{127C014C-D579-42FC-A2FD-34212B4D9113}.Release|x64.Build.0 = Release
+		{127C014C-D579-42FC-A2FD-34212B4D9113}.Release|x86.ActiveCfg = Release
+		{127C014C-D579-42FC-A2FD-34212B4D9113}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

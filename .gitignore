@@ -53,3 +53,5 @@ Temporary Items
 /BluetoothCameraClient/.gitignore
 /BluetoothCameraServerWin/BluetoothCameraServer/BluetoothCameraServer.vcxproj.user
 /BluetoothCameraServerWin/Release
+/BluetoothCameraServerWin/BluetoothCameraServer/Release
+/BluetoothCameraServerWin/Setup/*
