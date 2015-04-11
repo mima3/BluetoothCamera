@@ -93,8 +93,6 @@ bool CBluetoothCameraReceiver::OnConnectedCallback(SOCKET socket, SOCKADDR_BTH s
 }
 
 
-
-
 void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH saddr, char* data, int recvSize) {
 	UINT64 addr = GET_SAP(saddr.btAddr);
 	CAutoLock lock(&this->m_mutexlock);

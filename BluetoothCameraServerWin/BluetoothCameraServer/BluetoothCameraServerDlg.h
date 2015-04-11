@@ -25,6 +25,8 @@ private:
 	CBluetoothServer m_bluetoothServer;
 	CBluetoothCameraReceiver* m_bluetoothReceiver;
 	map<UINT64, CWnd*> m_mapCameraWindows;
+
+
 	// ŽÀ‘•
 protected:
 	HICON m_hIcon;

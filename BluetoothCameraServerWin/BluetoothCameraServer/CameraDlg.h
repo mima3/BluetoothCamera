@@ -1,6 +1,6 @@
 #pragma once
 #include "afxwin.h"
-
+class CAviFile;
 
 /**
  * @class CCameraDlg
@@ -21,6 +21,12 @@ protected:
 	CStatic m_pictCamera;
 	UINT64 m_deviceAddr;
 	CStatic m_lblDeviceId;
+	bool m_recording;
+	CButton m_buttonRec;
+	CAviFile* m_aviFile;
+	bool m_IgnoreReceive;
+	HBITMAP m_lastReceivedBitmap;
+
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
 
@@ -34,4 +40,6 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBnClickedLightOn();
 	afx_msg void OnBnClickedLightOff();
+	afx_msg void OnBnClickedButtonRec();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
