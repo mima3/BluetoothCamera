@@ -163,20 +163,22 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 			lpBitmap->bmiHeader.biPlanes = 1;
 			lpBitmap->bmiHeader.biBitCount = 32;
 			lpBitmap->bmiHeader.biCompression = BI_RGB;
+			bool isDecoded = false;
 			HBITMAP hBmp = CreateDIBSection(NULL, lpBitmap, DIB_RGB_COLORS, (void**)&rgb, NULL, 0);
 			if (pRcvData->m_format == IMAGE_FORMAT_YUV420) {
-				CBluetoothCameraReceiver::decodeYUV420SP(rgb, pRcvData->m_buff, pRcvData->m_width, pRcvData->m_height);
-			}
-			else {
-				// TODO Error.
+				if (CBluetoothCameraReceiver::decodeYUV420SP(rgb, pRcvData->m_buff, pRcvData->m_BufferSize, pRcvData->m_width, pRcvData->m_height)) {
+					isDecoded = true;
+				}
 			}
 			delete lpBitmap;
 
-			CameraImageData* pData = new CameraImageData;
-			pData->bufferSize = pRcvData->m_BufferSize;
-			pData->hBitmap = hBmp;
-			pData->deviceId = addr;
-			::PostMessage(this->m_targethWnd, WM_BLUETOOTH_RECEIVED, (WPARAM)pData, NULL);
+			if (isDecoded) {
+				CameraImageData* pData = new CameraImageData;
+				pData->bufferSize = pRcvData->m_BufferSize;
+				pData->hBitmap = hBmp;
+				pData->deviceId = addr;
+				::PostMessage(this->m_targethWnd, WM_BLUETOOTH_RECEIVED, (WPARAM)pData, NULL);
+			}
 
 			delete pRcvData->m_buff;
 			pRcvData->m_buff = NULL;
@@ -216,18 +218,26 @@ void CBluetoothCameraReceiver::OnConnectionClosed(SOCKADDR_BTH saddr) {
  * http://qiita.com/GeneralD/items/68142abb852c392db236
  * @param [out] int[] rgb       変換されたRGB
  * @param [in]  char[] yuv420sp YUVのバッファ
+ * @param [in]  int yuv420size  YUVのバッファサイズ
  * @param [in]  int width       幅
  * @param [in]  int height      高さ
+ * @return true 成功 false 失敗
  */
-void CBluetoothCameraReceiver::decodeYUV420SP(int rgb[], char yuv420sp[], int width, int height) {
+bool CBluetoothCameraReceiver::decodeYUV420SP(int rgb[], char yuv420sp[], int yuv420size, int width, int height) {
 	const int frameSize = width * height;
 
 	for (int j = 0, yp = 0; j < height; j++) {
 		int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
 		for (int i = 0; i < width; i++, yp++) {
+			if (yp >= yuv420size) {
+				return false;
+			}
 			int y = (0xff & ((int)yuv420sp[yp])) - 16;
 			if (y < 0) y = 0;
 			if ((i & 1) == 0) {
+				if (uvp > yuv420size-2) {
+					return false;
+				}
 				v = (0xff & yuv420sp[uvp++]) - 128;
 				u = (0xff & yuv420sp[uvp++]) - 128;
 			}
@@ -244,6 +254,7 @@ void CBluetoothCameraReceiver::decodeYUV420SP(int rgb[], char yuv420sp[], int wi
 			rgb[i + (height - j - 1) * width] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
 		}
 	}
+	return true;
 }
 
 int CBluetoothCameraReceiver::getRgbValueInRange(int value) {
