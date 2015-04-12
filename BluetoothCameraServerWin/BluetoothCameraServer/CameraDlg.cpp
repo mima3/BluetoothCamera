@@ -46,6 +46,7 @@ void CCameraDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CAMERA, m_pictCamera);
 	DDX_Control(pDX, IDC_DEVICE_ID, m_lblDeviceId);
 	DDX_Control(pDX, IDC_BUTTON_REC, m_buttonRec);
+	DDX_Control(pDX, IDC_CREATED_TIME, m_lblCreatedTime);
 }
 
 
@@ -100,6 +101,11 @@ afx_msg LRESULT CCameraDlg::OnBluetoothReceived(WPARAM wParam, LPARAM /*lParam*/
 	if (this->m_aviFile) {
 		m_lastReceivedBitmap = CopyBitmap(NULL, hBmp);
 	}
+	struct tm curTm;
+	localtime_s(&curTm, &pData->createdTime);
+	WCHAR str[256];
+	_wasctime_s(str, &curTm);
+	m_lblCreatedTime.SetWindowTextW(str);
 
 	CDC* pDC = m_pictCamera.GetDC();
 

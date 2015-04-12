@@ -42,4 +42,6 @@ protected:
 	afx_msg void OnBnClickedLightOff();
 	afx_msg void OnBnClickedButtonRec();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+public:
+	CStatic m_lblCreatedTime;
 };

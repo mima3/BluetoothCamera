@@ -117,7 +117,7 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 			OnErrorCallback(error);
 			return;
 		}
-
+		pRcvData->m_receivedTime = CBufferUtil::GetUINT64Data(data, offset);
 
 		// サーバの受信を無効にする
 		CBluetoothCameraSender::SetServerStatus(socket, 0);
@@ -177,6 +177,7 @@ void CBluetoothCameraReceiver::OnReceivedCallback(SOCKET socket, SOCKADDR_BTH sa
 				pData->bufferSize = pRcvData->m_BufferSize;
 				pData->hBitmap = hBmp;
 				pData->deviceId = addr;
+				pData->createdTime = pRcvData->m_receivedTime;
 				::PostMessage(this->m_targethWnd, WM_BLUETOOTH_RECEIVED, (WPARAM)pData, NULL);
 			}
 

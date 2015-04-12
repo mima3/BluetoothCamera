@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.nio.ByteBuffer;
+import java.util.Date;
 
 
 public class CameraMonitorActivity extends Activity {
@@ -40,6 +41,7 @@ public class CameraMonitorActivity extends Activity {
         public int width = 0;
         public int height = 0;
         public int format = 0;
+        public Date createdDate;
         ReceivedData(String deviceAddress) {
             this.deviceAddress = deviceAddress;
             this.currentPos = 0;
@@ -136,6 +138,8 @@ public class CameraMonitorActivity extends Activity {
                     case BluetoothCameraNetInterface.DATA_CODE_PICTURE: {
                         setServerStatus(0);
                         receivingData.currentPos = 0;
+                        receivingData.createdDate = new Date(buf.getLong(offset) * 1000);
+                        offset += 8;
                         receivingData.width = buf.getInt(offset);
                         offset += 4;
                         receivingData.height = buf.getInt(offset);

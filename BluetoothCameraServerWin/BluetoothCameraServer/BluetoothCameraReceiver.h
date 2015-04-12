@@ -9,6 +9,7 @@ struct CameraImageData {
 	UINT64 deviceId;	//! デバイスのGUID
 	size_t bufferSize;	//! バッファのサイズ
 	HBITMAP hBitmap;	//! ビットマップのハンドル
+	time_t createdTime; //! イメージの作成日
 };
 
 /**
@@ -32,6 +33,7 @@ public:
 	UINT32 m_width;
 	UINT32 m_height;
 	UINT32 m_format;
+	time_t m_receivedTime;
 };
 
 /**
